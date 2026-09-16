@@ -49,12 +49,12 @@ def _i(name, default):        # int из env
 TELEGRAM_TOKEN   = os.getenv("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 
-SCAN_INTERVAL       = _i("SCAN_INTERVAL", 60)          # как часто сканировать, сек (30-60)
-PUMP_LOOKBACK_MIN   = _i("PUMP_LOOKBACK_MIN", 7)       # окно роста, минут
+SCAN_INTERVAL       = _i("SCAN_INTERVAL", 30)          # как часто сканировать, сек (30-60)
+PUMP_LOOKBACK_MIN   = _i("PUMP_LOOKBACK_MIN", 6)       # окно роста, минут
 PUMP_THRESHOLD_PCT  = _f("PUMP_THRESHOLD_PCT", 5.0)    # порог роста за окно, %
 MIN_TURNOVER_24H    = _f("MIN_TURNOVER_24H", 5_000_000)  # мин. оборот за 24ч, USDT
 MIN_AGE_DAYS        = _i("MIN_AGE_DAYS", 30)           # монета старше N дней
-COOLDOWN_MIN        = _i("COOLDOWN_MIN", 30)           # антиспам на монету, минут
+COOLDOWN_MIN        = _i("COOLDOWN_MIN", 120)           # антиспам на монету, минут
 RSI_PERIOD          = _i("RSI_PERIOD", 14)
 MAX_CONCURRENCY     = _i("MAX_CONCURRENCY", 12)        # одновременных запросов к Bybit
 STOP_BUFFER_PCT     = _f("STOP_BUFFER_PCT", 1.5)       # буфер стопа над хаем, %

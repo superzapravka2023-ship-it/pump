@@ -35,11 +35,11 @@ def _i(n, d):
 TELEGRAM_TOKEN   = os.getenv("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 
-SCAN_INTERVAL      = _i("SCAN_INTERVAL", 60)
-PUMP_LOOKBACK_MIN  = _i("PUMP_LOOKBACK_MIN", 7)       # окно пампа, минут
+SCAN_INTERVAL      = _i("SCAN_INTERVAL", 30)
+PUMP_LOOKBACK_MIN  = _i("PUMP_LOOKBACK_MIN", 6)       # окно пампа, минут
 PUMP_THRESHOLD_PCT = _f("PUMP_THRESHOLD_PCT", 5.0)    # порог пампа, %
 MIN_TURNOVER_24H   = _f("MIN_TURNOVER_24H", 5_000_000)
-MIN_AGE_DAYS       = _i("MIN_AGE_DAYS", 30)
+MIN_AGE_DAYS       = _i("MIN_AGE_DAYS", 120)
 
 # --- подтверждение разворота ---
 ROLLOVER_MIN_PCT   = _f("ROLLOVER_MIN_PCT", 0.3)     # цена уже ниже хая минимум на это (вершина есть)

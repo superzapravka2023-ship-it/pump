@@ -1,67 +1,33 @@
-# Bybit Short-Scalper Signal Bot
+# Bybit Short-Scalper Bot v2 — с подтверждением разворота
 
-Сканирует все USDT-перпетуалы **Bybit** каждые 30–60 сек, ловит аномальный
-рост (памп) и присылает в Telegram **сигнал на ШОРТ** с уровнями входа, стопа
-и тейков.
+Ловит памп на Bybit и шлёт сигнал в ШОРТ **только когда импульс выдохся и вошли
+продавцы**: вершина сформирована, цена начала откатывать, свеча отказа/красная,
+RSI перекуплен, лонги в ловушке (растущий OI). Смысл: «заходи в шорт — жду откат
+вниз ~1–3%». Тейки/стопы в сигнал не пишутся.
 
-Использует **публичный** Bybit V5 API — ключи биржи не нужны. Нужен только
-Telegram-бот (токен от @BotFather) и твой chat_id.
+Публичный Bybit V5 API, ключи биржи не нужны. Нужен только Telegram-бот и chat_id.
 
-## Что именно ищет
+## Как отбирается сигнал
+1. Памп ≥ `PUMP_THRESHOLD_PCT`% за `PUMP_LOOKBACK_MIN` мин, оборот ≥ `MIN_TURNOVER_24H`, монета старше `MIN_AGE_DAYS`.
+2. **Вершина сформирована:** цена уже ниже хая на `ROLLOVER_MIN_PCT`…`MAX_ROLLOVER_PCT`% (не шортим вертикаль и не входим слишком поздно).
+3. **Признаки продавца (нужно ≥ `MIN_REVERSAL_SCORE`):** верхний фитиль ≥ `WICK_MIN_PCT`%, красная свеча/слом импульса, RSI ≥ `RSI_OB`, растущий открытый интерес.
 
-Монета попадает в сигнал, если **одновременно**:
-- это USDT-перпетуал Bybit;
-- оборот за 24ч ≥ `MIN_TURNOVER_24H` (по умолч. 5 000 000 USDT);
-- монета листнута ≥ `MIN_AGE_DAYS` дней назад (по умолч. 30);
-- цена выросла ≥ `PUMP_THRESHOLD_PCT`% (по умолч. 5%) за `PUMP_LOOKBACK_MIN` минут (по умолч. 7).
+## Деплой GitHub → Railway
+```bash
+git init && git add . && git commit -m "short bot v2"
+git branch -M main
+git remote add origin https://github.com/USERNAME/REPO.git
+git push -u origin main
+```
+Railway → New Project → Deploy from GitHub repo → Variables: впиши переменные из
+`.env.example` (минимум TELEGRAM_TOKEN, TELEGRAM_CHAT_ID). Worker, без веб-порта.
 
-В сигнал добавляются подтверждения: RSI(1m) перекупленность, положительный
-funding, верхний фитиль последней свечи. Антиспам: одна монета не чаще раза
-в `COOLDOWN_MIN` минут.
+## Тюнинг
+- Меньше и точнее: `MIN_REVERSAL_SCORE=3`, `WICK_MIN_PCT=0.7`.
+- Больше сигналов: `MIN_REVERSAL_SCORE=1`, `PUMP_THRESHOLD_PCT=4`.
+- Ловить откат раньше/позже: двигай `ROLLOVER_MIN_PCT` и `MAX_ROLLOVER_PCT`.
 
-## Деплой: GitHub → Railway
-
-1. **GitHub.** Создай новый репозиторий и залей туда эти файлы:
-   ```bash
-   git init
-   git add .
-   git commit -m "bybit short scalper bot"
-   git branch -M main
-   git remote add origin https://github.com/USERNAME/REPO.git
-   git push -u origin main
-   ```
-
-2. **Telegram.** Получи токен у [@BotFather](https://t.me/BotFather) (`/newbot`)
-   и свой chat_id у [@userinfobot](https://t.me/userinfobot). Напиши своему боту
-   `/start` хотя бы один раз, чтобы он мог тебе писать.
-
-3. **Railway.**
-   - [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub repo** → выбери репозиторий.
-   - Railway сам увидит `requirements.txt` (Nixpacks) и `railway.json` со стартовой командой `python bot.py`.
-   - Вкладка **Variables** → добавь переменные из `.env.example`
-     (минимум `TELEGRAM_TOKEN` и `TELEGRAM_CHAT_ID`).
-   - Деплой стартует автоматически. В логах должно появиться «Старт…» и в
-     Telegram придёт «🚀 … запущен».
-
-> Это **worker** (фоновый процесс без веб-порта) — HTTP-порт открывать не нужно.
-> `restartPolicyType: ALWAYS` поднимет бота после падения.
-
-## Команды бота
-- `/start` — приветствие + текущие настройки
-- `/status` — аптайм, число сканов, монет в отборе, сигналов
-- `/help` — краткая справка
-
-## Настройка под себя
-Всё меняется переменными окружения на Railway без правки кода. Хочешь агрессивнее —
-`PUMP_THRESHOLD_PCT=4`, `SCAN_INTERVAL=30`. Хочешь строже — подними порог/оборот.
-
-## Как докрутить до автоторговли (по желанию)
-Сейчас бот только сигналит. Чтобы он сам открывал шорт:
-1. Добавь `pybit` в `requirements.txt`.
-2. Заведи API-ключи Bybit (с правами на торговлю фьючерсами) в переменные `BYBIT_API_KEY` / `BYBIT_API_SECRET`.
-3. В `analyze()`/после отправки алерта вызывай `session.place_order(category="linear", symbol=..., side="Sell", orderType="Market", qty=...)` через `pybit.unified_trading.HTTP`.
-4. Обязательно выставляй stop-loss (`stopLoss=`) и считай `qty` от риска на сделку, а не от всего депозита.
-
-**Дисклеймер.** Это не финансовый совет. Шорт вертикальных пампов — высокий
-риск (памп может продолжиться, ликвидация). Тестируй на малом объёме и всегда
-со стопом.
+## Честно
+Разворот после пампа — вероятность, а не гарантия: часть пампов продолжит рост
+(тогда шорт против тренда). Подтверждения снижают долю таких входов, но не убирают.
+Риск и объём — на твоей стороне (стопы намеренно не в сигнале).

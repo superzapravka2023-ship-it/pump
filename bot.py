@@ -35,7 +35,7 @@ def _i(n, d):
 TELEGRAM_TOKEN   = os.getenv("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 
-SCAN_INTERVAL      = _i("SCAN_INTERVAL", 60)
+SCAN_INTERVAL      = _i("SCAN_INTERVAL", 30)
 PUMP_LOOKBACK_MIN  = _i("PUMP_LOOKBACK_MIN", 7)       # окно пампа, минут
 PUMP_THRESHOLD_PCT = _f("PUMP_THRESHOLD_PCT", 5.0)    # порог пампа, %
 MIN_TURNOVER_24H   = _f("MIN_TURNOVER_24H", 5_000_000)
@@ -48,7 +48,7 @@ WICK_MIN_PCT       = _f("WICK_MIN_PCT", 0.5)         # верхний фитил
 RSI_OB             = _f("RSI_OB", 70.0)              # перекупленность
 MIN_REVERSAL_SCORE = _i("MIN_REVERSAL_SCORE", 2)     # мин. признаков продавца, чтобы слать
 RSI_PERIOD         = _i("RSI_PERIOD", 14)
-COOLDOWN_MIN       = _i("COOLDOWN_MIN", 30)
+COOLDOWN_MIN       = _i("COOLDOWN_MIN", 120)
 MAX_CONCURRENCY    = _i("MAX_CONCURRENCY", 12)
 
 BYBIT_BASE = "https://api.bybit.com"

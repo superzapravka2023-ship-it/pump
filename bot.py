@@ -40,7 +40,7 @@ def _i(n, d):
 TELEGRAM_TOKEN   = os.getenv("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 
-SCAN_INTERVAL      = _i("SCAN_INTERVAL", 60)          # частота скана, сек
+SCAN_INTERVAL      = _i("SCAN_INTERVAL", 30)          # частота скана, сек
 PUMP_LOOKBACK_MIN  = _i("PUMP_LOOKBACK_MIN", 5)       # окно роста, минут
 PUMP_THRESHOLD_PCT = _f("PUMP_THRESHOLD_PCT", 5.0)    # порог роста за окно, %
 MIN_TURNOVER_24H   = _f("MIN_TURNOVER_24H", 5_000_000)  # мин. оборот 24ч (Bybit), USDT
